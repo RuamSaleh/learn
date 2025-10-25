@@ -3,8 +3,6 @@ import SwiftUI
 struct startleraningView: View {
     @State private var textstring = "Log as Learned"
     @State private var selectedDate = Date()
-    
-    // 🔹 Shared states with calendar
     @State private var learnedDays: Set<Date> = []
     @State private var freezedDays: Set<Date> = []
     @State private var daysLearnedCount: Int = 0
@@ -62,8 +60,7 @@ struct startleraningView: View {
             Text("out of 2 Freezes used")
         }
     }
-    
-    // MARK: - Shared Logic
+
     private func handleLogAction(type: String) {
         if type == "learned" {
             textstring = "Learned Today"
@@ -77,7 +74,9 @@ struct startleraningView: View {
                 freezedDays.insert(selectedDate)
                 daysFreezedCount += 1
             }
+            
         }
+        
     }
 }
 
