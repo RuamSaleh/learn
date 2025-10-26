@@ -1,4 +1,5 @@
 import SwiftUI
+
 struct CompactWeekCalendarView: View {
     @Binding var learnedDays: Set<Date>
     @Binding var freezedDays: Set<Date>
@@ -8,6 +9,8 @@ struct CompactWeekCalendarView: View {
 
     @State private var currentWeekStart: Date = Date().startOfWeek(using: Calendar.current) ?? Date()
     @State private var showMonthPicker: Bool = false
+    @State private var selectedMonth: Int = Calendar.current.component(.month, from: Date())
+    @State private var selectedYear: Int = Calendar.current.component(.year, from: Date())
     
     private let calendar = Calendar.current
     
@@ -15,11 +18,11 @@ struct CompactWeekCalendarView: View {
         VStack(spacing: 16) {
             // Header
             HStack {
-                Button(action: { withAnimation { showMonthPicker.toggle() } }) {
+                Button(action: { withAnimation(.spring()) { showMonthPicker.toggle() } }) {
                     HStack(spacing: 6) {
                         Text(monthYearString(for: selectedDate))
                             .font(.headline)
-                        Image(systemName: "chevron.down")
+                        Image(systemName: showMonthPicker ? "chevron.up" : "chevron.down")
                             .font(.subheadline)
                     }
                 }
@@ -38,6 +41,88 @@ struct CompactWeekCalendarView: View {
                 }
             }
             .padding(.horizontal)
+            .overlay(
+                Group {
+                    if showMonthPicker {
+                        // Dimmed background — tap anywhere to dismiss
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                withAnimation(.spring()) {
+                                    showMonthPicker = false
+                                    updateSelectedDate()
+                                }
+                            }
+                            .transition(.opacity)
+                        
+                        // Popup card
+                        VStack(spacing: 12) {
+                            HStack(spacing: 20) {
+                                // Year Picker
+                                Picker("Year", selection: $selectedYear) {
+                                    ForEach((2020...2035), id: \.self) { year in
+                                        Text("\(year)").tag(year)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(width: 100, height: 160)
+                                
+                                // Month Picker
+                                Picker("Month", selection: $selectedMonth) {
+                                    ForEach(1...12, id: \.self) { month in
+                                        Text(DateFormatter().monthSymbols[month - 1]).tag(month)
+                                    }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(width: 140, height: 160)
+                            }
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color(.systemBackground))
+                                .shadow(radius: 10)
+                        )
+                        .frame(maxWidth: 320)
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                }
+            )
+//            // Month picker overlay
+//            if showMonthPicker {
+//                VStack(spacing: 12) {
+//                    HStack(spacing: 20) {
+//                        // Year Picker
+//                        Picker("Year", selection: $selectedYear) {
+//                            ForEach((2020...2035), id: \.self) { year in
+//                                Text("\(year)").tag(year)
+//                            }
+//                        }
+//                        .pickerStyle(.wheel)
+//                        .frame(width: 100, height: 120)
+//                        
+//                        // Month Picker
+//                        Picker("Month", selection: $selectedMonth) {
+//                            ForEach(1...12, id: \.self) { month in
+//                                Text(DateFormatter().monthSymbols[month - 1]).tag(month)
+//                            }
+//                        }
+//                        .pickerStyle(.wheel)
+//                        .frame(width: 140, height: 120)
+//                    }
+//                    
+//                    Button("Done") {
+//                        withAnimation {
+//                            showMonthPicker = false
+//                            updateSelectedDate()
+//                        }
+//                    }
+//                    .buttonStyle(.borderedProminent)
+//                    .padding(.top, 6)
+//                }
+//                .transition(.move(edge: .top).combined(with: .opacity))
+//                .padding(.bottom, 10)
+//            }
             
             // Week row
             HStack(spacing: 12) {
@@ -87,7 +172,7 @@ struct CompactWeekCalendarView: View {
                         Image(systemName: "cube.fill")
                         VStack(alignment: .leading, spacing: 2) {
                             Text("\(daysFreezedCount)").bold()
-                            Text("Day Freezed").font(.caption2)
+                            Text("Days Freezed").font(.caption2)
                         }
                     }
                     .padding()
@@ -110,6 +195,17 @@ struct CompactWeekCalendarView: View {
     }
     
     // MARK: - Helpers
+    private func updateSelectedDate() {
+        var components = DateComponents()
+        components.year = selectedYear
+        components.month = selectedMonth
+        components.day = 1
+        if let newDate = calendar.date(from: components) {
+            selectedDate = newDate
+            currentWeekStart = newDate.startOfWeek(using: calendar) ?? currentWeekStart
+        }
+    }
+    
     private func circleColor(for date: Date) -> Color {
         if learnedDays.contains(where: { isSameDay($0, date) }) {
             return .orange
@@ -144,13 +240,5 @@ struct CompactWeekCalendarView: View {
     
     private func isSameDay(_ a: Date, _ b: Date) -> Bool {
         Calendar.current.isDate(a, inSameDayAs: b)
-    }
-}
-
-fileprivate extension Date {
-    func startOfWeek(using calendar: Calendar) -> Date? {
-        let weekday = calendar.component(.weekday, from: self)
-        let daysToSubtract = weekday - calendar.firstWeekday
-        return calendar.date(byAdding: .day, value: -daysToSubtract, to: calendar.startOfDay(for: self))
     }
 }
