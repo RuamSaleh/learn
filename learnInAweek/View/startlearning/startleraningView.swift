@@ -1,18 +1,15 @@
 import SwiftUI
 
 struct startleraningView: View {
+
     @EnvironmentObject var learningModel: LearningModel
-    
-    @State private var textstring = "Log as Learned"
     @State private var selectedDate = Date()
-    @State private var learnedDays: Set<Date> = []
-    @State private var freezedDays: Set<Date> = []
-    @State private var daysLearnedCount: Int = 0
-    @State private var daysFreezedCount: Int = 0
-    @State private var showFreezeAlert = false
+    @State private var textstring = "Log as Learned"
     @State private var mainButtonColor: Color = .orange
     @State private var hasLoggedToday = false
     @State private var navigateToGoal = false
+    @State private var showFreezeAlert = false
+
 
     var body: some View {
         VStack(spacing: 24) {
@@ -39,15 +36,15 @@ struct startleraningView: View {
             }
             .padding(.horizontal)
             .padding(.top, 10)
-            
             CompactWeekCalendarView(
-                learnedDays: $learnedDays,
-                freezedDays: $freezedDays,
-                daysLearnedCount: $daysLearnedCount,
-                daysFreezedCount: $daysFreezedCount,
+                learnedDays: $learningModel.learnedDays,
+                freezedDays: $learningModel.freezedDays,
+                daysLearnedCount: $learningModel.daysLearnedCount,
+                daysFreezedCount: $learningModel.daysFreezedCount,
                 selectedDate: $selectedDate,
                 disableDaySelection: true
             )
+
             .frame(width: 365, height: 254)
             .glassEffect(.regular, in: .rect(cornerRadius: 13))
             
@@ -92,31 +89,30 @@ struct startleraningView: View {
             goal()
                 .environmentObject(learningModel)
         }
+        .navigationBarHidden(true)
     }
     
     private func handleLogAction(type: String) {
         selectedDate = Date()
         
         if type == "learned" {
-            if !learnedDays.contains(selectedDate) {
-                learnedDays.insert(selectedDate)
-                daysLearnedCount += 1
-                textstring = "Learned Today"
-                mainButtonColor = .orange
-                hasLoggedToday = true
-            }
+            learningModel.logLearnedDay(selectedDate)
+            textstring = "Learned Today"
+            mainButtonColor = .orange
+            hasLoggedToday = true
         } else if type == "freezed" {
-            if learningModel.useFreeze() {
-                if !freezedDays.contains(selectedDate) {
-                    freezedDays.insert(selectedDate)
-                    daysFreezedCount += 1
-                    textstring = "Day Freezed"
-                    mainButtonColor = .blue
-                    hasLoggedToday = true
-                }
+            if learningModel.logFreezedDay(selectedDate) {
+                textstring = "Day Freezed"
+                mainButtonColor = .blue
+                hasLoggedToday = true
             } else {
                 showFreezeAlert = true
             }
         }
     }
+
+    
+    
+    
 }
+

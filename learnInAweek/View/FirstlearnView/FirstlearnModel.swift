@@ -1,18 +1,21 @@
 ////
 ////  FirstlearnModel.swift
 ////  learnInAweek
-////
-////  Created by ruam on 30/04/1447 AH.
-////The prain
-//import SwiftUI
-//
-////import Foundation
-//
-//// ViewModel for your ContentView
-//class FirstlearnModel: ObservableObject {
-//    @Published var selectedTimeframe: String = ""
-//
-//    func selectTimeframe(_ title: String) {
-//        selectedTimeframe = title
-//    }
-//}
+
+import SwiftUI
+
+struct TimeframeButton: View {
+    let title: String
+    @Binding var selectedTimeframe: String
+
+    var body: some View {
+        Button(action: { selectedTimeframe = title }) {
+            Text(title)
+                .frame(width: 97, height: 48)
+                .fontWeight(.bold)
+        }
+        .buttonStyle(.glass(.regular.tint(selectedTimeframe == title ? .orange : .clear)))
+        .glassEffect(.regular.tint(.black))
+        .shadow(color: .white, radius: -0.2, x: 0.2, y: 0.2)
+    }
+}

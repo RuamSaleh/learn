@@ -126,6 +126,7 @@ struct goal: View {
             startleraningView()
                 .environmentObject(learningModel)
         }
+
     }
 }
 

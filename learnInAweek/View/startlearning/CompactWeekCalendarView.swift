@@ -8,7 +8,6 @@ struct CompactWeekCalendarView: View {
     @Binding var selectedDate: Date
     var disableDaySelection: Bool = false
     
-    
     @State private var currentWeekStart: Date = Date().startOfWeek(using: Calendar.current) ?? Date()
     @State private var showMonthPicker: Bool = false
     @State private var selectedMonth: Int = Calendar.current.component(.month, from: Date())
@@ -24,12 +23,18 @@ struct CompactWeekCalendarView: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack {
-                Button(action: { withAnimation(.spring()) { showMonthPicker.toggle() } }) {
+                Button(action: { withAnimation(.spring()) { showMonthPicker.toggle()
+                } }) {
                     HStack(spacing: 6) {
                         Text(monthYearString(for: selectedDate))
                             .font(.headline)
+                            .foregroundColor(.white)
+
                         Image(systemName: showMonthPicker ? "chevron.up" : "chevron.down")
                             .font(.subheadline)
+                            .foregroundColor(.orange)
+
+                            
                     }
                 }
                 
@@ -39,18 +44,17 @@ struct CompactWeekCalendarView: View {
                     Button(action: { moveWeek(by: -1) }) {
                         Image(systemName: "chevron.left")
                             .font(.title2)
+                            .foregroundColor(.orange)
                     }
                     Button(action: { moveWeek(by: 1) }) {
                         Image(systemName: "chevron.right")
                             .font(.title2)
+                            .foregroundColor(.orange)
+
                     }
                 }
             }
             .padding(.horizontal)
-            
-            
-            
-            
             
             // for the month and year Picker
             .overlay(
