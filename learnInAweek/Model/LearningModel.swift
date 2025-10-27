@@ -35,4 +35,6 @@ class LearningModel: ObservableObject {
         freezesUsed += 1
         return true
     }
+    
+    
 }

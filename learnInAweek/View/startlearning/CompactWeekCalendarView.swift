@@ -5,7 +5,8 @@ struct CompactWeekCalendarView: View {
     @Binding var freezedDays: Set<Date>
     @Binding var daysLearnedCount: Int
     @Binding var daysFreezedCount: Int
-    @Binding var selectedDate: Date// اتوقع بحذفه
+    @Binding var selectedDate: Date
+    var disableDaySelection: Bool = false
     
     
     @State private var currentWeekStart: Date = Date().startOfWeek(using: Calendar.current) ?? Date()

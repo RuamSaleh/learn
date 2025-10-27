@@ -10,11 +10,12 @@ struct startleraningView: View {
     @State private var daysLearnedCount: Int = 0
     @State private var daysFreezedCount: Int = 0
     @State private var showFreezeAlert = false
-    @State private var mainButtonColor: Color = .orange // default orange
+    @State private var mainButtonColor: Color = .orange
+    @State private var hasLoggedToday = false
+    @State private var navigateToGoal = false
 
     var body: some View {
         VStack(spacing: 24) {
-            // Top section
             HStack {
                 Text("Activity")
                     .font(.title)
@@ -25,30 +26,31 @@ struct startleraningView: View {
                         Image(systemName: "calendar")
                             .font(.system(size: 24, weight: .medium))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
                     
-                    Button { print("Pencil tapped!") } label: {
+                    Button {
+                        navigateToGoal = true
+                    } label: {
                         Image(systemName: "pencil.and.outline")
                             .font(.system(size: 24, weight: .medium))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
                 }
             }
             .padding(.horizontal)
             .padding(.top, 10)
             
-            // Calendar Section
             CompactWeekCalendarView(
                 learnedDays: $learnedDays,
                 freezedDays: $freezedDays,
                 daysLearnedCount: $daysLearnedCount,
                 daysFreezedCount: $daysFreezedCount,
-                selectedDate: $selectedDate
+                selectedDate: $selectedDate,
+                disableDaySelection: true
             )
             .frame(width: 365, height: 254)
             .glassEffect(.regular, in: .rect(cornerRadius: 13))
             
-            // Main circular button
             Button(action: { handleLogAction(type: "learned") }) {
                 Text(textstring)
                     .font(.system(size: 44, weight: .semibold))
@@ -61,11 +63,10 @@ struct startleraningView: View {
                     )
                     .animation(.easeInOut(duration: 0.25), value: mainButtonColor)
             }
+            .disabled(hasLoggedToday)
             
-            // Secondary button (freeze)
             Button(action: { handleLogAction(type: "freezed") }) {
                 HStack {
-                    Image(systemName: "snowflake")
                     Text("Log as Freezed")
                         .font(.system(size: 17, weight: .medium))
                 }
@@ -77,8 +78,8 @@ struct startleraningView: View {
                         .shadow(color: .blue.opacity(0.3), radius: 8, y: 4)
                 )
             }
+            .disabled(hasLoggedToday)
             
-            // Freeze count
             Text("\(learningModel.freezesUsed) out of \(learningModel.freezeLimit) Freezes used")
                 .font(.system(size: 15))
                 .foregroundColor(.white.opacity(0.8))
@@ -87,28 +88,31 @@ struct startleraningView: View {
             Spacer()
         }
         .padding(.bottom, 20)
-        .alert("Freeze Limit Reached", isPresented: $showFreezeAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("You’ve used all your available freezes for this \(learningModel.timeframe.lowercased()).")
+        .fullScreenCover(isPresented: $navigateToGoal) {
+            goal()
+                .environmentObject(learningModel)
         }
     }
     
     private func handleLogAction(type: String) {
+        selectedDate = Date()
+        
         if type == "learned" {
-            textstring = "Learned Today"
-            mainButtonColor = .orange
             if !learnedDays.contains(selectedDate) {
                 learnedDays.insert(selectedDate)
                 daysLearnedCount += 1
+                textstring = "Learned Today"
+                mainButtonColor = .orange
+                hasLoggedToday = true
             }
         } else if type == "freezed" {
             if learningModel.useFreeze() {
-                textstring = "Day Freezed"
-                mainButtonColor = .blue
                 if !freezedDays.contains(selectedDate) {
                     freezedDays.insert(selectedDate)
                     daysFreezedCount += 1
+                    textstring = "Day Freezed"
+                    mainButtonColor = .blue
+                    hasLoggedToday = true
                 }
             } else {
                 showFreezeAlert = true

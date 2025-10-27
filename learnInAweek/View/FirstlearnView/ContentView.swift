@@ -18,6 +18,7 @@ struct ContentView: View {
                                 .zIndex(0)
                             
                             Circle()
+                            
                                 .fill(Color.black.opacity(0.8))
                                 .frame(width: 109, height: 109)
                                 .glassEffect(.clear)
@@ -125,5 +126,6 @@ struct TimeframeButton: View {
 }
 
 #Preview {
+    
     ContentView()
 }
